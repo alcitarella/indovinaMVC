@@ -6,6 +6,8 @@
 package it.edu.isspitagora.indovinaunnumero.model;
 
 import java.security.InvalidParameterException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -23,6 +25,8 @@ public class Model {
     private int segreto ; //Conserva il valore del numero scelto a caso
     private int tentativiFatti ; // Mantiene traccia del numero di tentativi fatti dall'utente
     private boolean inGioco = false ; //La partita è in corso??
+    
+    private Set<Integer> tentativi; // Il Set mi serve a gestire eventuali doppioni inseriti durante la partita
 
     public int getNMAX() {
         return NMAX;
@@ -49,6 +53,8 @@ public class Model {
         this.segreto = (int)(Math.random() * NMAX) + 1; //Genero il numero casuale
         this.tentativiFatti = 0;
         this.inGioco = true;
+        //Creo il Set per la gestione dei doppioni
+        tentativi = new HashSet<Integer>();
     }
     
     public int tentativo(int tentativo){
@@ -64,11 +70,14 @@ public class Model {
         
         //Validazione dell'input (controllo range)
         if(!tentativoValido(tentativo)){
-            throw new InvalidParameterException("Devi inserire un valore compreso tra 1 e "+this.NMAX+"\n");
+            throw new InvalidParameterException("Devi inserire un valore compreso tra 1 e "+this.NMAX+"\n" +
+                    "Oppure hai inserito un valore che avevi già scelto in precedenza \n");
         }
         
         //Da qui in poi il tentativo è valido
         this.tentativiFatti++ ;
+        //Inserisco il tentativo nel Set
+        this.tentativi.add(tentativo);
     
         //Controllo se non ho più tentativi
         if(this.tentativiFatti == this.TMAX-1){
@@ -91,8 +100,11 @@ public class Model {
     }
     
     //Metodo PRIVATO per la validazione dell'input (Controllo range ed eventualmente altro...)
+    //Controlla anche se ho già fatto un tentativo con lo stesso numero 
     private boolean tentativoValido(int tentativo){
         if(tentativo < 1 || tentativo > this.NMAX)
+            return false;
+        if(tentativi.contains(tentativo))
             return false;
         else
             return true;
